@@ -94,7 +94,13 @@ class ClientRichPresence : MinecraftInstance() {
         val serverData = mc.currentServerData
 
         // Set display infos
-        builder.setDetails(if (Display.isActive()) (if (mc.isIntegratedServerRunning || serverData != null) "Playing on " + mc.currentServerData.serverIP else "Idle...") else "Preferably doing nothing")
+        // Note: You cannot
+        // builder.setSmallImage("cat", here)
+        // put serverData in here
+
+        builder.setLargeImage("logo", "LB++")
+        builder.setSmallImage("cat", "what?")
+        builder.setDetails(if (Display.isActive()) (if (mc.isIntegratedServerRunning || serverData != null) "LiquidBouncing on " + serverData.serverIP else "Chilling") else "Preferably doing nothing")
         builder.setState("Version: " + LiquidBounce.CLIENT_VERSION)
 
 
@@ -120,7 +126,5 @@ class ClientRichPresence : MinecraftInstance() {
 
     private fun loadConfiguration() {
         appID = 1244619267392143501L
-        assets["logo"] = "logo"
-        assets["mongus"] = "mongus"
     }
 }
