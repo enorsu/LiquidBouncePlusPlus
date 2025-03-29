@@ -12,10 +12,7 @@ import net.ccbluex.liquidbounce.features.module.ModuleCategory
 import net.ccbluex.liquidbounce.features.module.ModuleInfo
 import net.ccbluex.liquidbounce.features.module.modules.movement.Fly
 import net.ccbluex.liquidbounce.features.module.modules.render.FreeCam
-import net.ccbluex.liquidbounce.utils.MovementUtils
-import net.ccbluex.liquidbounce.utils.PacketUtils
-import net.ccbluex.liquidbounce.utils.RotationUtils
-import net.ccbluex.liquidbounce.utils.VecRotation
+import net.ccbluex.liquidbounce.utils.*
 import net.ccbluex.liquidbounce.utils.block.BlockUtils
 import net.ccbluex.liquidbounce.utils.misc.NewFallingPlayer
 import net.ccbluex.liquidbounce.utils.timer.MSTimer
@@ -32,6 +29,7 @@ import net.minecraft.item.ItemBucket
 import net.minecraft.network.play.client.C03PacketPlayer
 import net.minecraft.network.play.client.C03PacketPlayer.*
 import net.minecraft.network.play.client.C09PacketHeldItemChange
+import net.minecraft.network.play.client.C0CPacketInput
 import net.minecraft.network.play.server.S08PacketPlayerPosLook
 import net.minecraft.network.play.server.S12PacketEntityVelocity
 import net.minecraft.util.AxisAlignedBB
@@ -45,7 +43,7 @@ import kotlin.math.sqrt
 
 @ModuleInfo(name = "NoFall", spacedName = "No Fall", description = "Prevents you from taking fall damage.", category = ModuleCategory.PLAYER)
 class NoFall : Module() {
-    val typeValue = ListValue("Type", arrayOf("Edit", "Packet", "MLG", "AAC", "Spartan", "CubeCraft", "Hypixel", "Phase", "Verus", "Medusa", "Motion", "Matrix", "Vulcan"), "Edit")
+    val typeValue = ListValue("Type", arrayOf("Edit", "Packet", "MLG", "AAC", "Spartan", "CubeCraft", "Hypixel", "Phase", "Verus", "Medusa", "Motion", "Matrix", "Vulcan", "MiniBlox-Blink"), "Edit")
 
     val editMode = ListValue("Edit-Mode", arrayOf("Always", "Default", "Smart", "NoGround", "Damage"), "Always", { typeValue.get().equals("edit", true) })
     private val packetMode = ListValue("Packet-Mode", arrayOf("Default", "Smart"), "Default", { typeValue.get().equals("packet", true) })
@@ -58,6 +56,13 @@ class NoFall : Module() {
     private val flySpeedValue = FloatValue("MotionSpeed", -0.01F, -5F, 5F, { typeValue.get().equals("motion", true) })
 
     private val voidCheckValue = BoolValue("Void-Check", true)
+
+    private val debugValue = BoolValue("Debug", false)
+
+    fun debug(s: String, force: Boolean = false) {
+        if (debugValue.get() || force)
+            ClientUtils.displayChatMessage("§7[§3§lNoFall§7]§f $s")
+    }
 
     private val aac4FlagCooldown = MSTimer()
     private val spartanTimer = TickTimer()
@@ -173,6 +178,22 @@ class NoFall : Module() {
         }
 
         when (typeValue.get().lowercase()) {
+            "miniblox-blink" -> {
+                if (mc.thePlayer.fallDistance > 3F) {
+                    debug("pushing packet")
+                    BlinkUtils.pushPacket(
+                        C03PacketPlayer(true),
+                        c0CPacketInput = TODO()
+                    )
+                    needSpoof = true
+
+                }
+                if (mc.thePlayer.onGround) {
+                    debug("Released packet")
+                    BlinkUtils.releasePacket()
+                }
+
+            }
             "packet" -> when (packetMode.get().lowercase()) {
                 "default" -> {
                     if (mc.thePlayer.fallDistance > 2F)
@@ -277,7 +298,7 @@ class NoFall : Module() {
                 }
                 "3.3.15" -> if (mc.thePlayer.fallDistance > 2) {
                     if (!mc.isIntegratedServerRunning) {
-                        mc.netHandler.addToSendQueue(C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, Double.NaN, mc.thePlayer.posZ, false))
+                        mc.netHandler.addToSendQueue(C04PacketPlayerPosition(mc.thePlayer.posX, Double.NaN, mc.thePlayer.posZ, false))
                     }
                     mc.thePlayer.fallDistance = -9999f
                 }
@@ -327,7 +348,7 @@ class NoFall : Module() {
                         aac5doFlag = false
 
                     if (aac5doFlag)
-                        mc.netHandler.addToSendQueue(C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY + if (mc.thePlayer.onGround) 0.5 else 0.42, mc.thePlayer.posZ, true))
+                        mc.netHandler.addToSendQueue(C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY + if (mc.thePlayer.onGround) 0.5 else 0.42, mc.thePlayer.posZ, true))
                 }
             }
             "motion" -> if (mc.thePlayer.fallDistance > 3F) {
@@ -341,7 +362,7 @@ class NoFall : Module() {
                         mc.timer.timerSpeed = 0.05f
                         Timer().schedule(100L) {
                             try {
-                                mc.netHandler.addToSendQueue(C03PacketPlayer.C04PacketPlayerPosition(fallPos.x.toDouble(), fallPos.y.toDouble(), fallPos.z.toDouble(), true))
+                                mc.netHandler.addToSendQueue(C04PacketPlayerPosition(fallPos.x.toDouble(), fallPos.y.toDouble(), fallPos.z.toDouble(), true))
                                 mc.thePlayer.setPosition(fallPos.x.toDouble(), fallPos.y.toDouble(), fallPos.z.toDouble())
                             } catch (e: Exception) {
                                 // ignore, may leave unexpectedly.
@@ -513,8 +534,8 @@ class NoFall : Module() {
             if (matrixSend) {
                 matrixSend = false
                 event.cancelEvent()
-                PacketUtils.sendPacketNoEvent(C03PacketPlayer.C04PacketPlayerPosition(packet.x, packet.y, packet.z, true))
-                PacketUtils.sendPacketNoEvent(C03PacketPlayer.C04PacketPlayerPosition(packet.x, packet.y, packet.z, false))
+                PacketUtils.sendPacketNoEvent(C04PacketPlayerPosition(packet.x, packet.y, packet.z, true))
+                PacketUtils.sendPacketNoEvent(C04PacketPlayerPosition(packet.x, packet.y, packet.z, false))
             } 
             
             if (doSpoof) {
@@ -581,8 +602,8 @@ class NoFall : Module() {
                             packet.onGround = true
                             mc.thePlayer.onGround = false
                             packet.y += 1.0
-                            mc.netHandler.addToSendQueue(C03PacketPlayer.C04PacketPlayerPosition(packet.x, packet.y - 1.0784, packet.z, false))
-                            mc.netHandler.addToSendQueue(C03PacketPlayer.C04PacketPlayerPosition(packet.x, packet.y - 0.5, packet.z, true))
+                            mc.netHandler.addToSendQueue(C04PacketPlayerPosition(packet.x, packet.y - 1.0784, packet.z, false))
+                            mc.netHandler.addToSendQueue(C04PacketPlayerPosition(packet.x, packet.y - 0.5, packet.z, true))
                         }
                     }
                 }
@@ -600,8 +621,8 @@ class NoFall : Module() {
                     isDmgFalling = false
                     event.cancelEvent()
                     mc.thePlayer.onGround = false
-                    mc.netHandler.addToSendQueue(C03PacketPlayer.C04PacketPlayerPosition(packet.x, packet.y - 256, packet.z, false))
-                    mc.netHandler.addToSendQueue(C03PacketPlayer.C04PacketPlayerPosition(packet.x, (-10).toDouble() , packet.z, true))
+                    mc.netHandler.addToSendQueue(C04PacketPlayerPosition(packet.x, packet.y - 256, packet.z, false))
+                    mc.netHandler.addToSendQueue(C04PacketPlayerPosition(packet.x, (-10).toDouble() , packet.z, true))
                     mc.timer.timerSpeed = 0.18f
                     modifiedTimer = true
                 }
