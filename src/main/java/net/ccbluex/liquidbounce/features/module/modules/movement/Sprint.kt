@@ -61,7 +61,7 @@ class Sprint : Module() {
             return
         }
 
-        if (allDirectionsValue.get() || mc.thePlayer.movementInput.moveForward >= 0.8F) {
+        if (allDirectionsValue.get() || mc.thePlayer.movementInput.moveForward >= 0.7F) {
             mc.thePlayer.setSprinting(true)
         }
 

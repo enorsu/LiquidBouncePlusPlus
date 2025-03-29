@@ -211,7 +211,8 @@ class ModuleManager : Listenable {
                 SuperheroFX::class.java,
                 NewGUI::class.java,
                 ResetVL::class.java,
-                SpeedMine::class.java
+                SpeedMine::class.java,
+                OldSprint::class.java
         )
 
         registerModule(Fucker)
