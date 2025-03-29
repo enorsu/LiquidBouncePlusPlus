@@ -118,7 +118,7 @@ public class Speed extends Module {
         }
     };
 
-    public final ListValue ncpModeValue = new ListValue("NCP-Mode", new String[]{"BHop", "FHop", "SBHop", "Hop", "YPort", "OldNCP"}, "BHop", () -> typeValue.get().equalsIgnoreCase("ncp")) {
+    public final ListValue ncpModeValue = new ListValue("NCP-Mode", new String[]{"BHop", "FHop", "SBHop", "Hop", "YPort"}, "BHop", () -> typeValue.get().equalsIgnoreCase("ncp")) {
 
         @Override
         protected void onChange(final String oldValue, final String newValue) {

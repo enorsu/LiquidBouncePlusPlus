@@ -42,7 +42,7 @@ class ClientRichPresence : MinecraftInstance() {
 
             loadConfiguration()
 
-            ipcClient = IPCClient(1271516747861856317)
+            ipcClient = IPCClient(1244619267392143501)
             ipcClient?.setListener(object : IPCListener {
 
                 /**
@@ -90,16 +90,13 @@ class ClientRichPresence : MinecraftInstance() {
         // Set playing time
         builder.setStartTimestamp(timestamp)
 
-        // Check assets contains logo and set logo
-        if (assets.containsKey("logo"))
-            builder.setLargeImage(assets["logo"], "Ermm what the sigma")
 
         val serverData = mc.currentServerData
 
         // Set display infos
-        builder.setDetails(if (Display.isActive()) (if (mc.isIntegratedServerRunning || serverData != null) "Playing" else "Idle...") else "AFK")
-        builder.setState("Using version: " + LiquidBounce.CLIENT_VERSION)
-        builder.setSmallImage(assets["mongus"], "Amongus car")
+        builder.setDetails(if (Display.isActive()) (if (mc.isIntegratedServerRunning || serverData != null) "Playing on " + mc.currentServerData.serverIP else "Idle...") else "Preferably doing nothing")
+        builder.setState("Version: " + LiquidBounce.CLIENT_VERSION)
+
 
         // Check ipc client is connected and send rpc
         if (ipcClient?.status == PipeStatus.CONNECTED)
@@ -122,7 +119,7 @@ class ClientRichPresence : MinecraftInstance() {
     }
 
     private fun loadConfiguration() {
-        appID = 1271516747861856317L
+        appID = 1244619267392143501L
         assets["logo"] = "logo"
         assets["mongus"] = "mongus"
     }

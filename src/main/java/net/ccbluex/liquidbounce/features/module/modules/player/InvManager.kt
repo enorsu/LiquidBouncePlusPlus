@@ -60,12 +60,12 @@ class InvManager : Module() {
     private val eventModeValue = ListValue("OnEvent", arrayOf("Update", "MotionPre", "MotionPost"), "Update")
 
     // Inventory options
-    private val invOpenValue = BoolValue("InvOpen", false)
-    private val invSpoof = BoolValue("InvSpoof", true)
+    private val invOpenValue = BoolValue("InvOpen", true)
+    private val invSpoof = BoolValue("InvSpoof", false)
     private val invSpoofOld = BoolValue("InvSpoof-Old", false, { invSpoof.get() })
 
     // Others
-    private val armorsValue = BoolValue("WearArmors", true)
+    private val armorsValue = BoolValue("WearArmor", true)
     private val noMoveValue = BoolValue("NoMove", false)
     private val noScaffoldValue = BoolValue("NoScaffold", true)
     private val hotbarValue = BoolValue("Hotbar", true)

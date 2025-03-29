@@ -212,7 +212,8 @@ class ModuleManager : Listenable {
                 NewGUI::class.java,
                 ResetVL::class.java,
                 SpeedMine::class.java,
-                OldSprint::class.java
+                OldSprint::class.java,
+                MiniBloxSupport::class.java
         )
 
         registerModule(Fucker)

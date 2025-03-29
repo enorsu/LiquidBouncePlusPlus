@@ -72,6 +72,7 @@ public class AntiBot extends Module {
     private final BoolValue removeFromWorld = new BoolValue("RemoveFromWorld", false);
     private final IntegerValue removeIntervalValue = new IntegerValue("Remove-Interval", 20, 1, 100, " tick");
     private final BoolValue debugValue = new BoolValue("Debug", false);
+    private final BoolValue miniblox = new BoolValue("MiniBlox-test", false);
 
     private final List<Integer> ground = new ArrayList<>();
     private final List<Integer> air = new ArrayList<>();
@@ -194,6 +195,11 @@ public class AntiBot extends Module {
             return false;
 
         final AntiBot antiBot = LiquidBounce.moduleManager.getModule(AntiBot.class);
+
+        assert antiBot != null;
+        if (antiBot.miniblox.get() && entity.getDisplayName().getUnformattedText().contains("BOT")) {
+            return true;
+        }
 
         if (antiBot == null || !antiBot.getState())
             return false;

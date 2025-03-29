@@ -26,7 +26,6 @@ import net.ccbluex.liquidbounce.utils.RotationUtils
 import net.ccbluex.liquidbounce.utils.Rotation
 import net.ccbluex.liquidbounce.utils.extensions.getDistanceToEntityBox
 import net.ccbluex.liquidbounce.utils.misc.RandomUtils
-import net.ccbluex.liquidbounce.utils.render.RenderUtils
 import net.ccbluex.liquidbounce.utils.timer.MSTimer
 import net.ccbluex.liquidbounce.utils.timer.TimeUtils
 import net.ccbluex.liquidbounce.value.BoolValue
@@ -52,12 +51,12 @@ import net.minecraft.util.Vec3
 import net.minecraft.world.WorldSettings
 import org.lwjgl.input.Keyboard
 import org.lwjgl.opengl.GL11
-import java.awt.Color
 import java.util.*
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.cos
 import kotlin.math.sin
+import net.ccbluex.liquidbounce.utils.BlinkUtils
 
 @ModuleInfo(name = "KillAura", spacedName = "Kill Aura", description = "Automatically attacks targets around you.",
         category = ModuleCategory.COMBAT, keyBind = Keyboard.KEY_R)
@@ -175,7 +174,7 @@ class KillAura : Module() {
     private val aacValue = BoolValue("AAC", false)
 
     private val silentRotationValue = BoolValue("SilentRotation", true, { !rotations.get().equals("none", true) })
-    val rotationStrafeValue = ListValue("Strafe", arrayOf("Off", "Strict", "Silent"), "Off")
+    val rotationStrafeValue = ListValue("Strafe", arrayOf("Off", "Strict", "Silent", "MiniBlox1", "MiniBlox2", "MiniBlox3"), "Off")
     
     private val fovValue = FloatValue("FOV", 180f, 0f, 180f)
 
@@ -342,6 +341,35 @@ class KillAura : Module() {
                 event.cancelEvent()
             }
             else when (rotationStrafeValue.get().lowercase()) {
+                "miniblox2" -> {
+                    update()
+                    BlinkUtils.pushPacket(C0CPacketInput(), C03PacketPlayer(false))
+
+                    //event.cancelEvent()
+
+                    BlinkUtils.releasePacket()
+                }
+
+                "miniblox1" -> {
+                    update()
+
+                    BlinkUtils.pushPacket(
+                        C00PacketKeepAlive(2),
+                        c0CPacketInput = TODO()
+                    )
+
+                    event.cancelEvent()
+
+                    mc.thePlayer.motionY += 0.005
+                    //mc.thePlayer.motionX *= 0.97
+                    //mc.thePlayer.motionZ *= 0.97
+
+                    BlinkUtils.releasePacket()
+
+
+
+                }
+
                 "strict" -> {
                     val (yaw) = RotationUtils.targetRotation ?: return
                     var strafe = event.strafe
@@ -374,6 +402,7 @@ class KillAura : Module() {
                     RotationUtils.targetRotation.applyStrafeToPlayer(event)
                     event.cancelEvent()
                 }
+
             }
         }
     }
