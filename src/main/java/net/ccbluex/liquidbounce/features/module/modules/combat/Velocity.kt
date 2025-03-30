@@ -15,7 +15,9 @@ import net.ccbluex.liquidbounce.features.module.Module
 import net.ccbluex.liquidbounce.features.module.ModuleCategory
 import net.ccbluex.liquidbounce.features.module.ModuleInfo
 import net.ccbluex.liquidbounce.features.module.modules.movement.Speed
+import net.ccbluex.liquidbounce.features.module.modules.player.Blink
 import net.ccbluex.liquidbounce.ui.client.hud.element.elements.Notification
+import net.ccbluex.liquidbounce.utils.BlinkUtils
 import net.ccbluex.liquidbounce.utils.MovementUtils
 import net.ccbluex.liquidbounce.utils.RotationUtils
 import net.ccbluex.liquidbounce.utils.timer.MSTimer
@@ -43,7 +45,7 @@ class Velocity : Module() {
     private val verticalValue = FloatValue("Vertical", 0F, -1F, 1F, "x")
     private val horizontalExplosionValue = FloatValue("HorizontalExplosion", 0F, 0F, 1F, "x")
     private val verticalExplosionValue = FloatValue("VerticalExplosion", 0F, 0F, 1F, "x")
-    private val modeValue = ListValue("Mode", arrayOf("yJumpscare" ,"yBoost", "Cancel", "Simple", "AACv4", "AAC4Reduce", "AAC5Reduce", "AAC5.2.0", "AAC", "AACPush", "AACZero",
+    private val modeValue = ListValue("Mode", arrayOf("Experimental-MiniBlox" ,"yJumpscare" ,"yBoost", "Cancel", "Simple", "AACv4", "AAC4Reduce", "AAC5Reduce", "AAC5.2.0", "AAC", "AACPush", "AACZero",
             "Reverse", "SmoothReverse", "Jump", "Glitch", "Phase", "Matrix", "Legit",  "AEMine", "Hycraft"), "Cancel") // later
     
     private val aac5KillAuraValue = BoolValue("AAC5.2.0-Attack-Only", true, { modeValue.get().equals("aac5.2.0", true) })
@@ -107,6 +109,15 @@ class Velocity : Module() {
             return
 
         when (modeValue.get().lowercase()) {
+            "experimental-miniblox" -> {
+                if (mc.thePlayer.hurtTime > 1 && mc.thePlayer.onGround) {
+                    BlinkUtils.pushPacket(c0CPacketInput = C03PacketPlayer(true), packets = C0CPacketInput())
+                    mc.thePlayer.motionX *= 0.5
+                    mc.thePlayer.motionY *= 0.5
+                    BlinkUtils.releasePacket()
+                }
+
+            }
 
             "yjumpscare" -> {
                 if (mc.thePlayer.hurtTime > 0 && !mc.thePlayer.onGround) {
