@@ -178,7 +178,7 @@ class NoFall : Module() {
         }
 
         when (typeValue.get().lowercase()) {
-            "miniblox-old" -> {
+/*            "miniblox-old" -> {
                 // @blatantguide method
                 if (mc.thePlayer.fallDistance > 2F) {
                     mc.thePlayer.motionY = -99.0
@@ -200,7 +200,7 @@ class NoFall : Module() {
                     BlinkUtils.releasePacket()
                 }
 
-            }
+            } */
             "packet" -> when (packetMode.get().lowercase()) {
                 "default" -> {
                     if (mc.thePlayer.fallDistance > 2F)
