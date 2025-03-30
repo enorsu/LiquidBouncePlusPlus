@@ -43,7 +43,7 @@ import kotlin.math.sqrt
 
 @ModuleInfo(name = "NoFall", spacedName = "No Fall", description = "Prevents you from taking fall damage.", category = ModuleCategory.PLAYER)
 class NoFall : Module() {
-    val typeValue = ListValue("Type", arrayOf("Edit", "Packet", "MLG", "AAC", "Spartan", "CubeCraft", "Hypixel", "Phase", "Verus", "Medusa", "Motion", "Matrix", "Vulcan", "MiniBlox-Blink"), "Edit")
+    val typeValue = ListValue("Type", arrayOf("Edit", "Packet", "MLG", "AAC", "Spartan", "CubeCraft", "Hypixel", "Phase", "Verus", "Medusa", "Motion", "Matrix", "Vulcan", "MiniBlox-Blink", "MiniBlox-Old"), "Edit")
 
     val editMode = ListValue("Edit-Mode", arrayOf("Always", "Default", "Smart", "NoGround", "Damage"), "Always", { typeValue.get().equals("edit", true) })
     private val packetMode = ListValue("Packet-Mode", arrayOf("Default", "Smart"), "Default", { typeValue.get().equals("packet", true) })
@@ -178,6 +178,13 @@ class NoFall : Module() {
         }
 
         when (typeValue.get().lowercase()) {
+            "miniblox-old" -> {
+                // @blatantguide method
+                if (mc.thePlayer.fallDistance > 2F) {
+                    mc.thePlayer.motionY = -99.0
+                    mc.thePlayer.onGround = true
+                }
+            }
             "miniblox-blink" -> {
                 if (mc.thePlayer.fallDistance > 3F) {
                     debug("pushing packet")

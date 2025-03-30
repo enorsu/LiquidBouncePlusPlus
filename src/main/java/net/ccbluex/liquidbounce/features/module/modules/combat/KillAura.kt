@@ -57,6 +57,7 @@ import kotlin.math.min
 import kotlin.math.cos
 import kotlin.math.sin
 import net.ccbluex.liquidbounce.utils.BlinkUtils
+import net.ccbluex.liquidbounce.utils.timer.TickTimer
 
 @ModuleInfo(name = "KillAura", spacedName = "Kill Aura", description = "Automatically attacks targets around you.",
         category = ModuleCategory.COMBAT, keyBind = Keyboard.KEY_R)
@@ -174,7 +175,9 @@ class KillAura : Module() {
     private val aacValue = BoolValue("AAC", false)
 
     private val silentRotationValue = BoolValue("SilentRotation", true, { !rotations.get().equals("none", true) })
-    val rotationStrafeValue = ListValue("Strafe", arrayOf("Off", "Strict", "Silent", "MiniBlox1", "MiniBlox2", "MiniBlox3"), "Off")
+    val rotationStrafeValue = ListValue("Strafe", arrayOf("Off", "Strict", "Silent"), "Off")
+
+    val minibloxStrafeValue = ListValue("MiniBlox-mode", arrayOf("Off", "StopXZ", "MiniBlox1", "MiniBlox2", "MiniBlox3", "MiniBlox4"), "Off")
     
     private val fovValue = FloatValue("FOV", 180f, 0f, 180f)
 
@@ -245,6 +248,8 @@ class KillAura : Module() {
 
     private var markEntity: EntityLivingBase? = null
     private val markTimer = MSTimer()
+
+    private val tickTimer = TickTimer()
 
     // Attack delay
     private val attackTimer = MSTimer()
@@ -340,10 +345,27 @@ class KillAura : Module() {
                 MovementUtils.strafeCustom(MovementUtils.getSpeed(), strafingData[0], strafingData[1], strafingData[2])
                 event.cancelEvent()
             }
-            else when (rotationStrafeValue.get().lowercase()) {
+            else when (minibloxStrafeValue.get().lowercase()) {
+                "stopxz" -> {
+                    mc.thePlayer.motionX = 0.0
+                    mc.thePlayer.motionZ = 0.0
+                }
+                "miniblox3" -> {
+
+
+                    BlinkUtils.pushPacket(C0CPacketInput(), C03PacketPlayer(false))
+
+
+                    BlinkUtils.releasePacket()
+                    event.cancelEvent()
+                    update()
+
+                }
+
                 "miniblox2" -> {
                     update()
                     BlinkUtils.pushPacket(C0CPacketInput(), C03PacketPlayer(false))
+
 
                     //event.cancelEvent()
 
@@ -353,10 +375,7 @@ class KillAura : Module() {
                 "miniblox1" -> {
                     update()
 
-                    BlinkUtils.pushPacket(
-                        C00PacketKeepAlive(2),
-                        c0CPacketInput = TODO()
-                    )
+                    BlinkUtils.pushPacket(C0CPacketInput(), C03PacketPlayer(false))
 
                     event.cancelEvent()
 
@@ -369,6 +388,10 @@ class KillAura : Module() {
 
 
                 }
+
+
+            }
+            else when (rotationStrafeValue.get().lowercase()) {
 
                 "strict" -> {
                     val (yaw) = RotationUtils.targetRotation ?: return
