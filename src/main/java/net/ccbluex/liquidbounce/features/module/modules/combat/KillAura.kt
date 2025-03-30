@@ -177,7 +177,7 @@ class KillAura : Module() {
     private val silentRotationValue = BoolValue("SilentRotation", true, { !rotations.get().equals("none", true) })
     val rotationStrafeValue = ListValue("Strafe", arrayOf("Off", "Strict", "Silent"), "Off")
 
-    val minibloxStrafeValue = ListValue("MiniBlox-mode", arrayOf("Off", "StopXZ", "MiniBlox1", "MiniBlox2", "MiniBlox3", "MiniBlox4"), "Off")
+    val minibloxStrafeValue = ListValue("MiniBlox-mode(experimental)", arrayOf("Off", "StopXZ", "MiniBlox1", "MiniBlox2", "MiniBlox3", "MiniBlox4"), "Off")
     
     private val fovValue = FloatValue("FOV", 180f, 0f, 180f)
 
@@ -333,6 +333,52 @@ class KillAura : Module() {
      */
     @EventTarget
     fun onStrafe(event: StrafeEvent) {
+        when (minibloxStrafeValue.get().lowercase()) {
+            "stopxz" -> {
+                mc.thePlayer.motionX = 0.0
+                mc.thePlayer.motionZ = 0.0
+            }
+            "miniblox3" -> {
+
+
+                BlinkUtils.pushPacket(C0CPacketInput(), C03PacketPlayer(false))
+
+
+                BlinkUtils.releasePacket()
+                event.cancelEvent()
+                update()
+
+            }
+
+            "miniblox2" -> {
+                update()
+                BlinkUtils.pushPacket(C0CPacketInput(), C03PacketPlayer(false))
+
+
+                //event.cancelEvent()
+
+                BlinkUtils.releasePacket()
+            }
+
+            "miniblox1" -> {
+                update()
+
+                BlinkUtils.pushPacket(C0CPacketInput(), C03PacketPlayer(false))
+
+                event.cancelEvent()
+
+                mc.thePlayer.motionY += 0.005
+                //mc.thePlayer.motionX *= 0.97
+                //mc.thePlayer.motionZ *= 0.97
+
+                BlinkUtils.releasePacket()
+
+
+
+            }
+
+
+        }
         val targetStrafe = LiquidBounce.moduleManager.getModule(TargetStrafe::class.java)!! as TargetStrafe
         if (rotationStrafeValue.get().equals("Off", true) && !targetStrafe.state)
             return
@@ -345,52 +391,7 @@ class KillAura : Module() {
                 MovementUtils.strafeCustom(MovementUtils.getSpeed(), strafingData[0], strafingData[1], strafingData[2])
                 event.cancelEvent()
             }
-            else when (minibloxStrafeValue.get().lowercase()) {
-                "stopxz" -> {
-                    mc.thePlayer.motionX = 0.0
-                    mc.thePlayer.motionZ = 0.0
-                }
-                "miniblox3" -> {
 
-
-                    BlinkUtils.pushPacket(C0CPacketInput(), C03PacketPlayer(false))
-
-
-                    BlinkUtils.releasePacket()
-                    event.cancelEvent()
-                    update()
-
-                }
-
-                "miniblox2" -> {
-                    update()
-                    BlinkUtils.pushPacket(C0CPacketInput(), C03PacketPlayer(false))
-
-
-                    //event.cancelEvent()
-
-                    BlinkUtils.releasePacket()
-                }
-
-                "miniblox1" -> {
-                    update()
-
-                    BlinkUtils.pushPacket(C0CPacketInput(), C03PacketPlayer(false))
-
-                    event.cancelEvent()
-
-                    mc.thePlayer.motionY += 0.005
-                    //mc.thePlayer.motionX *= 0.97
-                    //mc.thePlayer.motionZ *= 0.97
-
-                    BlinkUtils.releasePacket()
-
-
-
-                }
-
-
-            }
             else when (rotationStrafeValue.get().lowercase()) {
 
                 "strict" -> {

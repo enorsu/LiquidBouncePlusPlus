@@ -72,7 +72,7 @@ public class AntiBot extends Module {
     private final BoolValue removeFromWorld = new BoolValue("RemoveFromWorld", false);
     private final IntegerValue removeIntervalValue = new IntegerValue("Remove-Interval", 20, 1, 100, " tick");
     private final BoolValue debugValue = new BoolValue("Debug", false);
-    private final BoolValue miniblox = new BoolValue("MiniBlox-test", false);
+    private final BoolValue miniblox = new BoolValue("MiniBlox", false);
 
     private final List<Integer> ground = new ArrayList<>();
     private final List<Integer> air = new ArrayList<>();
