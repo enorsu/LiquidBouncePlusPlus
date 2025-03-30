@@ -177,7 +177,7 @@ class KillAura : Module() {
     private val silentRotationValue = BoolValue("SilentRotation", true, { !rotations.get().equals("none", true) })
     val rotationStrafeValue = ListValue("Strafe", arrayOf("Off", "Strict", "Silent"), "Off")
 
-    val minibloxStrafeValue = ListValue("MiniBlox-mode(experimental)", arrayOf("Off", "StopXZ", "MiniBlox1", "MiniBlox2", "MiniBlox3", "MiniBlox4"), "Off")
+    val minibloxStrafeValue = ListValue("MiniBlox-mode(experimental)", arrayOf("Off", "StopXZ", "MiniBlox1", "MiniBlox2", "MiniBlox3"), "Off")
     
     private val fovValue = FloatValue("FOV", 180f, 0f, 180f)
 

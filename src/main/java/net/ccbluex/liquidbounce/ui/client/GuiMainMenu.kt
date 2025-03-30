@@ -7,6 +7,7 @@ package net.ccbluex.liquidbounce.ui.client
 
 import net.ccbluex.liquidbounce.LiquidBounce
 import net.ccbluex.liquidbounce.ui.client.altmanager.GuiAltManager
+import net.ccbluex.liquidbounce.ui.client.clickgui.newVer.extensions.animLinear
 import net.ccbluex.liquidbounce.ui.font.Fonts
 import net.ccbluex.liquidbounce.utils.AnimationUtils
 import net.ccbluex.liquidbounce.utils.ClientUtils
@@ -66,12 +67,14 @@ class GuiMainMenu : GuiScreen(), GuiYesNoCallback {
             alrUpdate = true
         }
         val creditInfo = "Copyright Mojang AB. Do not distribute!"
+        val creatorInfo = "Made by " + net.ccbluex.liquidbounce.LiquidBounce.CLIENT_CREATOR
         drawBackground(0)
         GL11.glPushMatrix()
         renderSwitchButton()
         renderDarkModeButton()
-        Fonts.font40.drawStringWithShadow("LiquidBounce++ b${LiquidBounce.CLIENT_VERSION} | plusplus.funniesthvh.uk", 2F, height - 12F, -1)
+        Fonts.font40.drawStringWithShadow("LiquidBounce++ b${LiquidBounce.CLIENT_VERSION} | https://github.com/enorsu/LiquidBouncePlusPlus", 2F, height - 12F, -1)
         Fonts.font40.drawStringWithShadow(creditInfo, width - 3F - Fonts.font40.getStringWidth(creditInfo), height - 12F, -1)
+        Fonts.font40.drawStringWithShadow(creatorInfo, width - 3F - Fonts.font40.getStringWidth(creatorInfo), height - 24F, -1)
         if (useParallax) moveMouseEffect(mouseX, mouseY, 10F)
         GlStateManager.disableAlpha()
         RenderUtils.drawImage2(bigLogo, width / 2F - 50F, height / 2F - 90F, 100, 100)

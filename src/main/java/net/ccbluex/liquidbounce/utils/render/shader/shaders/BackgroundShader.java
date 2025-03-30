@@ -18,7 +18,7 @@ public final class BackgroundShader extends Shader {
     private float time;
 
     public BackgroundShader() {
-        super("background.frag");
+        super("old_background.frag");
     }
 
     @Override
