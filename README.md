@@ -1,9 +1,11 @@
 <img width="120" height="120" align="left" style="float: left; margin: 0 10px 0 0;" alt="lb++" src="src/main/resources/assets/minecraft/liquidbounce%2B/big.png">
 
-# LiquidBounce++              
+# LiquidBounce++(enorsu's fork)              
      
 A free mixin-based injection hacked-client for Minecraft 1.8.9 using Minecraft Forge.
 Based on LiquidBounce+
+
+This is a hobby and nothing serious.
 
 ## How to install
 1. Download [Forge 1.8.9](https://files.minecraftforge.net/net/minecraftforge/forge/index_1.8.9.html)
