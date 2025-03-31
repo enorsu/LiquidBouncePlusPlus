@@ -1,4 +1,5 @@
 /*
+ * 31/03/2025
  * LiquidBounce++ Hacked Client
  * A free open source mixin-based injection hacked client for Minecraft using Minecraft Forge.
  * https://github.com/PlusPlusMC/LiquidBouncePlusPlus/
@@ -16,8 +17,23 @@ import net.minecraft.client.gui.FontRenderer
 import java.awt.Color
 import java.util.*
 
-abstract class Value<T>(val name: String, protected var value: T, var canDisplay: () -> Boolean) {
-
+/**
+ * Base class for all configurable values in the client.
+ *
+ * @param T The type of the value
+ * @property name The name of the value
+ * @property value The current value
+ * @property canDisplay Lambda determining if this value should be displayed
+ */
+abstract class Value<T>(
+    val name: String, 
+    protected var value: T, 
+    var canDisplay: () -> Boolean = { true }
+) {
+    /**
+     * Sets the value and handles change events.
+     * @param newValue The new value to set
+     */
     fun set(newValue: T) {
         if (newValue == value) return
 
@@ -29,185 +45,257 @@ abstract class Value<T>(val name: String, protected var value: T, var canDisplay
             onChanged(oldValue, newValue)
             LiquidBounce.fileManager.saveConfig(LiquidBounce.fileManager.valuesConfig)
         } catch (e: Exception) {
-            ClientUtils.getLogger().error("[ValueSystem ($name)]: ${e.javaClass.name} (${e.message}) [$oldValue >> $newValue]")
+            ClientUtils.getLogger().error(
+                "[ValueSystem ($name)]: ${e.javaClass.name} (${e.message}) [$oldValue >> $newValue]",
+                e
+            )
         }
     }
 
+    /**
+     * Gets the current value.
+     */
     fun get() = value
 
+    /**
+     * Changes the value without triggering events.
+     */
     open fun changeValue(value: T) {
         this.value = value
     }
 
+    /**
+     * Converts the value to JSON for saving.
+     */
     abstract fun toJson(): JsonElement?
+
+    /**
+     * Loads the value from JSON.
+     */
     abstract fun fromJson(element: JsonElement)
 
+    /**
+     * Called before the value changes.
+     */
     protected open fun onChange(oldValue: T, newValue: T) {}
+
+    /**
+     * Called after the value has changed.
+     */
     protected open fun onChanged(oldValue: T, newValue: T) {}
-
 }
 
 /**
- * Bool value represents a value with a boolean
+ * Boolean value representation.
  */
-open class BoolValue(name: String, value: Boolean, displayable: () -> Boolean) : Value<Boolean>(name, value, displayable) {
-
-    constructor(name: String, value: Boolean): this(name, value, { true } )
-
+open class BoolValue(
+    name: String, 
+    value: Boolean, 
+    displayable: () -> Boolean = { true }
+) : Value<Boolean>(name, value, displayable) {
     override fun toJson() = JsonPrimitive(value)
 
     override fun fromJson(element: JsonElement) {
-        if (element.isJsonPrimitive)
+        if (element.isJsonPrimitive) {
             value = element.asBoolean || element.asString.equals("true", ignoreCase = true)
+        }
     }
-
 }
 
 /**
- * Integer value represents a value with a integer
+ * Integer value with range constraints.
+ *
+ * @property minimum The minimum allowed value
+ * @property maximum The maximum allowed value
+ * @property suffix The suffix to display after the value (e.g., "ms", "blocks")
  */
-open class IntegerValue(name: String, value: Int, val minimum: Int = 0, val maximum: Int = Integer.MAX_VALUE, val suffix: String, displayable: () -> Boolean)
-    : Value<Int>(name, value, displayable) {
-
-    constructor(name: String, value: Int, minimum: Int, maximum: Int, displayable: () -> Boolean): this(name, value, minimum, maximum, "", displayable)
-    constructor(name: String, value: Int, minimum: Int, maximum: Int, suffix: String): this(name, value, minimum, maximum, suffix, { true } )
-    constructor(name: String, value: Int, minimum: Int, maximum: Int): this(name, value, minimum, maximum, { true } )
-
+open class IntegerValue(
+    name: String,
+    value: Int,
+    val minimum: Int = 0,
+    val maximum: Int = Int.MAX_VALUE,
+    val suffix: String = "",
+    displayable: () -> Boolean = { true }
+) : Value<Int>(name, value, displayable) {
+    /**
+     * Sets the value from any Number type.
+     */
     fun set(newValue: Number) {
-        set(newValue.toInt())
+        set(newValue.toInt().coerceIn(minimum, maximum))
     }
 
     override fun toJson() = JsonPrimitive(value)
 
     override fun fromJson(element: JsonElement) {
-        if (element.isJsonPrimitive)
-            value = element.asInt
+        if (element.isJsonPrimitive) {
+            value = element.asInt.coerceIn(minimum, maximum)
+        }
     }
-
 }
 
 /**
- * Float value represents a value with a float
+ * Floating-point value with range constraints.
+ *
+ * @property minimum The minimum allowed value
+ * @property maximum The maximum allowed value
+ * @property suffix The suffix to display after the value
  */
-open class FloatValue(name: String, value: Float, val minimum: Float = 0F, val maximum: Float = Float.MAX_VALUE, val suffix: String, displayable: () -> Boolean)
-    : Value<Float>(name, value, displayable) {
-
-    constructor(name: String, value: Float, minimum: Float, maximum: Float, displayable: () -> Boolean): this(name, value, minimum, maximum, "", displayable)
-    constructor(name: String, value: Float, minimum: Float, maximum: Float, suffix: String): this(name, value, minimum, maximum, suffix, { true } )
-    constructor(name: String, value: Float, minimum: Float, maximum: Float): this(name, value, minimum, maximum, { true } )
-
+open class FloatValue(
+    name: String,
+    value: Float,
+    val minimum: Float = 0f,
+    val maximum: Float = Float.MAX_VALUE,
+    val suffix: String = "",
+    displayable: () -> Boolean = { true }
+) : Value<Float>(name, value, displayable) {
+    /**
+     * Sets the value from any Number type.
+     */
     fun set(newValue: Number) {
-        set(newValue.toFloat())
+        set(newValue.toFloat().coerceIn(minimum, maximum))
     }
 
     override fun toJson() = JsonPrimitive(value)
 
     override fun fromJson(element: JsonElement) {
-        if (element.isJsonPrimitive)
-            value = element.asFloat
+        if (element.isJsonPrimitive) {
+            value = element.asFloat.coerceIn(minimum, maximum)
+        }
     }
-
 }
 
 /**
- * Text value represents a value with a string
+ * Text string value.
  */
-open class TextValue(name: String, value: String, displayable: () -> Boolean) : Value<String>(name, value, displayable) {
-
-    constructor(name: String, value: String): this(name, value, { true } )
-
+open class TextValue(
+    name: String,
+    value: String,
+    displayable: () -> Boolean = { true }
+) : Value<String>(name, value, displayable) {
     override fun toJson() = JsonPrimitive(value)
 
     override fun fromJson(element: JsonElement) {
-        if (element.isJsonPrimitive)
+        if (element.isJsonPrimitive) {
             value = element.asString
-    }
-}
-/*
-open class ColorValue(name: String, value: Color, val transparent: Boolean, displayable: () -> Boolean) : Value<Color>(name, value, displayable) {
-
-    constructor(name: String, value: Color, transparent: Boolean): this(name, value, transparent, { true } )
-
-    fun set(hue: Float, saturation: Float, brightness: Float, alpha: Float) = set(Color(Color.HSBtoRGB(hue, saturation, brightness)).setAlpha(alpha))
-
-    override fun toJson(): JsonElement? {
-        val valueObject = JsonObject()
-        valueObject.addProperty("red", value.red)
-        valueObject.addProperty("green", value.green)
-        valueObject.addProperty("blue", value.blue)
-        valueObject.addProperty("alpha", value.alpha)
-        return valueObject
-    }
-
-    override fun fromJson(element: JsonElement) {
-        if (!element.isJsonObject) return
-        val valueObject = element.asJsonObject
-        value = Color(valueObject["red"].asInt, valueObject["green"].asInt, valueObject["blue"].asInt, valueObject["alpha"].asInt)
-    }
-
-}
-*/
-/**
- * Font value represents a value with a font
- */
-class FontValue(valueName: String, value: FontRenderer, displayable: () -> Boolean) : Value<FontRenderer>(valueName, value, displayable) {
-
-    constructor(valueName: String, value: FontRenderer): this(valueName, value, { true } )
-
-    override fun toJson(): JsonElement? {
-        val fontDetails = Fonts.getFontDetails(value) ?: return null
-        val valueObject = JsonObject()
-        valueObject.addProperty("fontName", fontDetails[0] as String)
-        valueObject.addProperty("fontSize", fontDetails[1] as Int)
-        return valueObject
-    }
-
-    override fun fromJson(element: JsonElement) {
-        if (!element.isJsonObject) return
-        val valueObject = element.asJsonObject
-        value = Fonts.getFontRenderer(valueObject["fontName"].asString, valueObject["fontSize"].asInt)
+        }
     }
 }
 
 /**
- * Block value represents a value with a block
+ * Color value with optional transparency support.
+ *
+ * @property transparent Whether alpha channel should be used
  */
-class BlockValue(name: String, value: Int, displayable: () -> Boolean) : IntegerValue(name, value, 1, 197, displayable) {
-    constructor(name: String, value: Int): this(name, value, { true } )
-}
+open class ColorValue(
+    name: String,
+    value: Color,
+    val transparent: Boolean = true,
+    displayable: () -> Boolean = { true }
+) : Value<Color>(name, value, displayable) {
+    /**
+     * Sets the color using HSB color model.
+     */
+    fun set(hue: Float, saturation: Float, brightness: Float, alpha: Float) =
+        set(Color(Color.HSBtoRGB(hue, saturation, brightness)).setAlpha(alpha))
 
-/**
- * List value represents a selectable list of values
- */
-open class ListValue(name: String, val values: Array<String>, value: String, displayable: () -> Boolean) : Value<String>(name, value, displayable) {
-
-    constructor(name: String, values: Array<String>, value: String): this(name, values, value, { true } )
-
-    @JvmField
-    var openList = false
-
-    init {
-        this.value = value
-    }
-
-    operator fun contains(string: String?): Boolean {
-        return Arrays.stream(values).anyMatch { s: String -> s.equals(string, ignoreCase = true) }
-    }
-
-    override fun changeValue(value: String) {
-        for (element in values) {
-            if (element.equals(value, ignoreCase = true)) {
-                this.value = element
-                break
-            }
+    override fun toJson(): JsonElement {
+        return JsonObject().apply {
+            addProperty("red", value.red)
+            addProperty("green", value.green)
+            addProperty("blue", value.blue)
+            addProperty("alpha", value.alpha)
         }
     }
 
+    override fun fromJson(element: JsonElement) {
+        if (element.isJsonObject) {
+            with(element.asJsonObject) {
+                value = Color(
+                    get("red").asInt,
+                    get("green").asInt,
+                    get("blue").asInt,
+                    get("alpha").asInt
+                )
+            }
+        }
+    }
+}
+
+/**
+ * Font renderer value.
+ */
+class FontValue(
+    name: String,
+    value: FontRenderer,
+    displayable: () -> Boolean = { true }
+) : Value<FontRenderer>(name, value, displayable) {
+    override fun toJson(): JsonElement? {
+        val fontDetails = Fonts.getFontDetails(value) ?: return null
+        return JsonObject().apply {
+            addProperty("fontName", fontDetails[0] as String)
+            addProperty("fontSize", fontDetails[1] as Int)
+        }
+    }
+
+    override fun fromJson(element: JsonElement) {
+        if (element.isJsonObject) {
+            with(element.asJsonObject) {
+                value = Fonts.getFontRenderer(
+                    get("fontName").asString,
+                    get("fontSize").asInt
+                )
+            }
+        }
+    }
+}
+
+/**
+ * Block ID value with valid Minecraft block ID range.
+ */
+class BlockValue(
+    name: String,
+    value: Int,
+    displayable: () -> Boolean = { true }
+) : IntegerValue(name, value, 1, 197, displayable)
+
+/**
+ * Selectable list of string values.
+ *
+ * @property values The available options in the list
+ * @property openList Whether the selection list should be displayed as open
+ */
+open class ListValue(
+    name: String,
+    val values: Array<String>,
+    value: String,
+    displayable: () -> Boolean = { true }
+) : Value<String>(name, value, displayable) {
+    var openList = false
+
+    init {
+        // Ensure the initial value is valid
+        changeValue(value)
+    }
+
+    /**
+     * Checks if the list contains a specific string (case-insensitive).
+     */
+    operator fun contains(string: String?): Boolean {
+        return values.any { it.equals(string, ignoreCase = true) }
+    }
+
+    /**
+     * Changes the value ensuring it's one of the valid options.
+     */
+    override fun changeValue(value: String) {
+        this.value = values.firstOrNull { it.equals(value, ignoreCase = true) } ?: this.value
+    }
+
     override fun toJson() = JsonPrimitive(value)
 
     override fun fromJson(element: JsonElement) {
-        if (element.isJsonPrimitive) changeValue(element.asString)
+        if (element.isJsonPrimitive) {
+            changeValue(element.asString)
+        }
     }
-
-
 }
