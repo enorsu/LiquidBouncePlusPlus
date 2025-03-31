@@ -110,7 +110,7 @@ class Velocity : Module() {
 
         when (modeValue.get().lowercase()) {
 
-            
+
 
             "yjumpscare" -> {
                 if (mc.thePlayer.hurtTime > 0 && !mc.thePlayer.onGround) {
