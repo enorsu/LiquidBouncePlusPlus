@@ -186,7 +186,7 @@ class ChestStealer : Module() {
                     move(screen, slot)
                 }
             }
-        } else if (autoCloseValue.get() && screen.inventorySlots.windowId == contentReceived && autoCloseTimer.hasTimePassed(nextCloseDelay)) {
+        } else if (autoCloseValue.get() && autoCloseTimer.hasTimePassed(nextCloseDelay)) {
             mc.thePlayer.closeScreen()
 
             if (silenceValue.get() && !stillDisplayValue.get()) LiquidBounce.hud.addNotification(Notification("Closed chest.", Notification.Type.INFO))
